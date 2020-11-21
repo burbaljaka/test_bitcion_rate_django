@@ -11,3 +11,4 @@ def get_current_rate_automatically():
     res = get_current_rate()
     if not res:
         return
+    res.save()
