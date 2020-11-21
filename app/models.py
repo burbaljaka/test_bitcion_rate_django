@@ -9,7 +9,8 @@ class SourceEnum(models.TextChoices):
 class Rate(models.Model):
 	rate = models.FloatField()
 	checked_at = models.DateTimeField(auto_now_add=True)
-	source = models.CharField(choices=SourceEnum.choices, default=SourceEnum.automat)
+	method = models.CharField(max_length=10, choices=SourceEnum.choices, default=SourceEnum.automat)
+	last_updated = models.DateTimeField()
 	
 	def __str__(self):
-		return str(rate) + " at " + checked_at.strftime("%d %m %y %H:%m:%s) 
+		return str(self.rate) + " at " + self.checked_at.strftime("%d-%m-%Y %H:%M:%S")

@@ -1,0 +1,48 @@
+version: '3.7'
+
+services:
+    db:
+        restart: always
+        image: postgres:latest
+        volumes:
+            - pgdata:/var/lib/postgresql/data/
+        environment:
+            POSTGRES_USER: django
+            POSTGRES_PASSWORD: django
+
+    redis:
+        image: redis:6.0-rc3-alpine
+        container_name: redis
+        hostname: redis
+        restart: always
+    api:
+        build: .
+        command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+        volumes:
+            - .:/django
+        ports:
+            - "8000:8000"
+        links:
+            - db
+            - redis
+        depends_on:
+            - db
+        environment:
+            DEBUG: "true"
+            DATABASE_NAME: django
+            DATABASE_USER: django
+            DATABASE_PASSWORD: django
+            DATABASE_SERVICE_HOST: database
+    celery:
+        build: .
+        command: celery -A bitcoin_rate worker -B -l info
+        volumes:
+            - .:/django
+        links:
+            - api
+            - redis
+            - db
+
+volumes:
+    pgdata:
+    static_volume:

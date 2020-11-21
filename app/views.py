@@ -1,21 +1,25 @@
-from django.shortcuts import render
-from rest_framework import Response
-from rest_framework.views import ApiView
+from loguru import logger
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from .business_logic import get_current_rate
 from .models import Rate
 from .serializers import RateSerializer
 
 
-class GetLastRate(ApiView):
-	def get(self, request, *-, **__):
-		queryset = Rate.objects.last()
-		return response(RateSerializer(queryset).data)
-
-class GetCurrentRate(ApiView):
+class GetLastRate(APIView):
 	def get(self, request, *_, **__):
+		queryset = Rate.objects.last()
+		return Response(RateSerializer(queryset).data)
+
+class GetCurrentRate(APIView):
+	def get(self, request, *_, **__):
+		logger.info("Got manual request to get current rate. Timer will be delayed")
 		res = get_current_rate()
-		serializer = RateSerializer(data=res)
-		serializer.is_valid(raise=True)
-		new_rate = Rate.objects.create(**serializer.data)
-		update_celery_task_timer()
-		return Response(RateSerializer(new_rate).data)
+		if not res:
+			return Response({'error': 'Something went wrong, please try again later'}, status.HTTP_400_BAD_REQUEST)
+		# update_celery_task_timer()
+		res.method = 'manual'
+		res.save()
+		return Response(RateSerializer(res).data)

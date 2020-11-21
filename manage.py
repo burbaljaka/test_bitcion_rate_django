@@ -6,7 +6,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bitcoint_rate.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bitcoin_rate.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
