@@ -1,0 +1,1 @@
+# test_bitcion_rate_django
